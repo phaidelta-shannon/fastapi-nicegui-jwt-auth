@@ -10,6 +10,7 @@ def register():
     result_label.set_text(response.json().get("message", "Error"))
 
 def login():
+    global token
     username = username_input.value
     password = password_input.value
     response = requests.post(f"{BASE_URL}/login", params={"username": username, "password": password})
@@ -19,10 +20,20 @@ def login():
     else:
         result_label.set_text("Login Failed")
 
-ui.label("User Authentication")
+def check_protected_route():
+    global token
+    if not token:
+        result_label.set_text("Please log in first!")
+        return
+    headers = {"Authorization": f"Bearer {token}"}
+    response = requests.get(f"{BASE_URL}/protected-route", headers=headers)
+    result_label.set_text(response.json().get("message", "Error"))
+
+ui.label("Secure user authentication & authorization in a FastAPI backend with a NiceGUI frontend using JWT")
 username_input = ui.input("Username")
 password_input = ui.input("Password", password=True)
 ui.button("Register", on_click=register)
 ui.button("Login", on_click=login)
+ui.button("Check Protected Route", on_click=check_protected_route)
 result_label = ui.label("")
 ui.run()
